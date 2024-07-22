@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var csv_writer_1 = require("csv-writer");
 var faker_1 = require("@faker-js/faker");
 // Generator function to create fake data
-function generateData(count) {
+function generateData(count, date) {
     var i;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -49,18 +49,18 @@ function generateData(count) {
             case 1:
                 if (!(i < count)) return [3 /*break*/, 4];
                 return [4 /*yield*/, {
-                        DATE: '04-04-2024 00:00',
+                        DATE: date,
                         AMOUNT: faker_1.faker.finance.amount(),
                         A: 'U09',
                         NPCI_CODE: faker_1.faker.helpers.arrayElement(['SUCCESS', 'FAILURE']),
                         RRN: faker_1.faker.random.numeric(12),
-                        B: '1',
+                        EXNID: faker_1.faker.string.uuid(),
                         PAYEE_VPA: faker_1.faker.internet.email().replace('.com', ''),
                         C: '1',
                         PAYER_VPA: faker_1.faker.internet.email().replace('.com', ''),
                         D: '0',
                         TXNID: faker_1.faker.string.uuid(),
-                        MCC: faker_1.faker.database.mongodbObjectId(),
+                        MCC: faker_1.faker.random.numeric(4),
                     }];
             case 2:
                 _a.sent();
@@ -72,43 +72,72 @@ function generateData(count) {
         }
     });
 }
-// Create the CSV writer
-var csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
-    path: 'switch.csv',
-    header: [
-        { id: 'DATE', title: 'DATE' },
-        { id: 'AMOUNT', title: 'AMOUNT' },
-        { id: 'A', title: 'A' },
-        { id: 'NPCI_CODE', title: 'NPCI_CODE' },
-        { id: 'RRN', title: 'RRN' },
-        { id: 'B', title: 'B' },
-        { id: 'PAYEE_VPA', title: 'PAYEE_VPA' },
-        { id: 'C', title: 'C' },
-        { id: 'PAYER_VPA', title: 'PAYER_VPA' },
-        { id: 'D', title: 'D' },
-        { id: 'TXNID', title: 'TXNID' },
-        { id: 'MCC', title: 'MCC' }
-    ]
-});
-// Generate and write the data to CSV
+// Function to format date to 'MMDDYY'
+function formatDate(date) {
+    var day = String(date.getDate()).padStart(2, '0');
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var year = String(date.getFullYear()).slice(-2);
+    return "".concat(month).concat(day).concat(year);
+}
+// Function to format date to 'YYYY-MM-DD HH:mm' format
+function formatFullDate(date) {
+    var day = String(date.getDate()).padStart(2, '0');
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var year = date.getFullYear();
+    var hours = '00';
+    var minutes = '00';
+    return "".concat(year, "-").concat(month, "-").concat(day, " ").concat(hours, ":").concat(minutes);
+}
+// Generate and write data for each date in the specified range
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var dataGenerator, data;
+    var startDate, endDate, oneDay, date, formattedDate, fullFormattedDate, fileName, csvWriter, dataGenerator, data;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                dataGenerator = generateData(500000);
-                data = dataGenerator.next();
+                startDate = new Date(2024, 3, 1);
+                endDate = new Date(2024, 3, 10);
+                oneDay = 24 * 60 * 60 * 1000;
+                date = startDate;
                 _a.label = 1;
             case 1:
-                if (!!data.done) return [3 /*break*/, 3];
-                return [4 /*yield*/, csvWriter.writeRecords([data.value])];
+                if (!(date <= endDate)) return [3 /*break*/, 6];
+                formattedDate = formatDate(date);
+                fullFormattedDate = formatFullDate(date);
+                fileName = "switch_".concat(formattedDate, ".csv");
+                csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
+                    path: fileName,
+                    header: [
+                        { id: 'DATE', title: 'DATE' },
+                        { id: 'AMOUNT', title: 'AMOUNT' },
+                        { id: 'A', title: 'A' },
+                        { id: 'NPCI_CODE', title: 'NPCI_CODE' },
+                        { id: 'RRN', title: 'RRN' },
+                        { id: 'EXNID', title: 'EXNID' },
+                        { id: 'PAYEE_VPA', title: 'PAYEE_VPA' },
+                        { id: 'C', title: 'C' },
+                        { id: 'PAYER_VPA', title: 'PAYER_VPA' },
+                        { id: 'D', title: 'D' },
+                        { id: 'TXNID', title: 'TXNID' },
+                        { id: 'MCC', title: 'MCC' }
+                    ]
+                });
+                dataGenerator = generateData(500, fullFormattedDate);
+                data = dataGenerator.next();
+                _a.label = 2;
             case 2:
+                if (!!data.done) return [3 /*break*/, 4];
+                return [4 /*yield*/, csvWriter.writeRecords([data.value])];
+            case 3:
                 _a.sent();
                 data = dataGenerator.next();
+                return [3 /*break*/, 2];
+            case 4:
+                console.log("Data generation completed for ".concat(fullFormattedDate, ". File: ").concat(fileName));
+                _a.label = 5;
+            case 5:
+                date = new Date(date.getTime() + oneDay);
                 return [3 /*break*/, 1];
-            case 3:
-                console.log('Data generation completed.');
-                return [2 /*return*/];
+            case 6: return [2 /*return*/];
         }
     });
 }); })();
