@@ -49,7 +49,7 @@ function generateData(count) {
             case 1:
                 if (!(i < count)) return [3 /*break*/, 4];
                 return [4 /*yield*/, {
-                        DATE: '01-04-2024 00:00',
+                        DATE: '04-04-2024 00:00',
                         AMOUNT: faker_1.faker.finance.amount(),
                         A: 'U09',
                         NPCI_CODE: faker_1.faker.helpers.arrayElement(['SUCCESS', 'FAILURE']),
@@ -60,7 +60,7 @@ function generateData(count) {
                         PAYER_VPA: faker_1.faker.internet.email().replace('.com', ''),
                         D: '0',
                         TXNID: faker_1.faker.string.uuid(),
-                        MCC: faker_1.faker.random.numeric(4),
+                        MCC: faker_1.faker.database.mongodbObjectId(),
                     }];
             case 2:
                 _a.sent();
@@ -96,7 +96,7 @@ var csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                dataGenerator = generateData(200000);
+                dataGenerator = generateData(500000);
                 data = dataGenerator.next();
                 _a.label = 1;
             case 1:

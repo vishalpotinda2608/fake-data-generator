@@ -50,17 +50,17 @@ function generateData(count) {
                 if (!(i < count)) return [3 /*break*/, 4];
                 return [4 /*yield*/, {
                         A: 'S75960940',
-                        DATE: '01-04-2024',
+                        DATE: '04-04-2024',
                         AMOUNT: faker_1.faker.finance.amount(),
-                        B: '01-04-2024',
+                        B: '04-04-2024',
                         C: '',
                         D: '2001',
                         E: '2650',
                         F: '20012207843065',
                         G: '27111001182650',
                         RRN: faker_1.faker.random.numeric(12),
-                        H: '01-04-2024 01:38:36',
-                        TXNID: faker_1.faker.string.uuid(),
+                        H: '04-04-2024 01:38:36',
+                        TXNID: faker_1.faker.database.mongodbObjectId(),
                     }];
             case 2:
                 _a.sent();
@@ -96,7 +96,7 @@ var csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                dataGenerator = generateData(200000);
+                dataGenerator = generateData(500000);
                 data = dataGenerator.next();
                 _a.label = 1;
             case 1:

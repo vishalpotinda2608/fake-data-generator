@@ -9,7 +9,7 @@ interface NPCI_TXN {
     A:any;
     NPCI_CODE: any | null;
     RRN: string | null;
-    B:any;
+    EXNID:any;
     PAYEE_VPA: string;
     C:any;
     PAYER_VPA: string | null;
@@ -19,15 +19,15 @@ interface NPCI_TXN {
 }
 
 // Generator function to create fake data
-function* generateData(count: number): IterableIterator<NPCI_TXN> {
+function* generateData(count: number,date:any): IterableIterator<NPCI_TXN> {
     for (let i = 0; i < count; i++) {
         yield {
-            DATE:'01-04-2024 00:00',
+            DATE:date,
             AMOUNT: faker.finance.amount(),
             A:'U09',
             NPCI_CODE: faker.helpers.arrayElement(['SUCCESS','FAILURE']),
             RRN: faker.random.numeric(12),
-            B:'1',
+            EXNID:faker.string.uuid(),
             PAYEE_VPA: faker.internet.email().replace('.com', ''),
             C:'1',
             PAYER_VPA: faker.internet.email().replace('.com', ''),
@@ -47,7 +47,7 @@ const csvWriter = createObjectCsvWriter({
         { id: 'A', title: 'A' },
         { id: 'NPCI_CODE', title: 'NPCI_CODE' },
         { id: 'RRN', title: 'RRN' },
-        { id: 'B', title: 'B' },
+        { id: 'EXNID', title: 'EXNID' },
         { id: 'PAYEE_VPA', title: 'PAYEE_VPA' },
         { id: 'C', title: 'C' },
         { id: 'PAYER_VPA', title: 'PAYER_VPA' },
@@ -59,7 +59,8 @@ const csvWriter = createObjectCsvWriter({
 
 // Generate and write the data to CSV
 (async () => {
-  const dataGenerator = generateData(200000);
+  const date='04-04-2024 00:00'
+  const dataGenerator = generateData(500,date);
   let data = dataGenerator.next();
   while (!data.done) {
       await csvWriter.writeRecords([data.value]);

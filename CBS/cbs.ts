@@ -19,20 +19,20 @@ interface NPCI_TXN {
 }
 
 // Generator function to create fake data
-function* generateData(count: number): IterableIterator<NPCI_TXN> {
+function* generateData(count: number,date:any): IterableIterator<NPCI_TXN> {
     for (let i = 0; i < count; i++) {
         yield {
             A:'S75960940',
-            DATE:'01-04-2024',
+            DATE:date,
             AMOUNT: faker.finance.amount(),
-            B:'01-04-2024',
+            B:'04-04-2024',
             C:'',
             D:'2001',
             E: '2650',
             F: '20012207843065',
             G: '27111001182650',
             RRN: faker.random.numeric(12),
-            H: '01-04-2024 01:38:36',
+            H: '04-04-2024 01:38:36',
             TXNID: faker.database.mongodbObjectId(),
         };
     }
@@ -59,7 +59,8 @@ const csvWriter = createObjectCsvWriter({
 
 // Generate and write the data to CSV
 (async () => {
-  const dataGenerator = generateData(200000);
+  const date='04-04-2024'
+  const dataGenerator = generateData(500,date);
   let data = dataGenerator.next();
   while (!data.done) {
       await csvWriter.writeRecords([data.value]);
