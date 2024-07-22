@@ -77,7 +77,7 @@ function formatDate(date: Date): string {
 // Generate and write data for each date from April 1 to April 10, 2024
 (async () => {
     const startDate = new Date(2024, 3, 1); // April 1, 2024
-    const endDate = new Date(2024, 3, 10); // April 10, 2024
+    const endDate = new Date(2024, 3, 30); // April 10, 2024
     const oneDay = 24 * 60 * 60 * 1000;
 
     for (let date = startDate; date <= endDate; date = new Date(date.getTime() + oneDay)) {
