@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var csv_writer_1 = require("csv-writer");
 var faker_1 = require("@faker-js/faker");
 // Generator function to create fake data
-function generateData(count) {
+function generateData(count, date) {
     var i;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -50,7 +50,7 @@ function generateData(count) {
                 if (!(i < count)) return [3 /*break*/, 4];
                 return [4 /*yield*/, {
                         A: 'S75960940',
-                        DATE: '04-04-2024',
+                        DATE: date,
                         AMOUNT: faker_1.faker.finance.amount(),
                         B: '04-04-2024',
                         C: '',
@@ -72,43 +72,73 @@ function generateData(count) {
         }
     });
 }
-// Create the CSV writer
-var csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
-    path: 'cbs.csv',
-    header: [
-        { id: 'A', title: 'A' },
-        { id: 'DATE', title: 'DATE' },
-        { id: 'AMOUNT', title: 'AMOUNT' },
-        { id: 'B', title: 'B' },
-        { id: 'C', title: 'C' },
-        { id: 'D', title: 'D' },
-        { id: 'E', title: 'E' },
-        { id: 'F', title: 'F' },
-        { id: 'G', title: 'G' },
-        { id: 'RRN', title: 'RRN' },
-        { id: 'H', title: 'H' },
-        { id: 'TXNID', title: 'TXNID' }
-    ]
-});
+// Function to format date to 'DD-MM-YYYY HH:mm:ss' format
+function formatDateToDDMMYYYYHHMMSS(date) {
+    var day = String(date.getDate()).padStart(2, '0');
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var year = date.getFullYear();
+    var hours = String(date.getHours()).padStart(2, '0');
+    var minutes = String(date.getMinutes()).padStart(2, '0');
+    var seconds = String(date.getSeconds()).padStart(2, '0');
+    return "".concat(day, "-").concat(month, "-").concat(year, " ").concat(hours, ":").concat(minutes, ":").concat(seconds);
+}
+// Function to format date to 'YYYYMMDD' for filename
+function formatDateForFilename(date) {
+    var day = String(date.getDate()).padStart(2, '0');
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var year = date.getFullYear();
+    return "".concat(year).concat(month).concat(day);
+}
 // Generate and write the data to CSV
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var dataGenerator, data;
+    var startDate, endDate, oneDay, date, formattedDate, formattedFilenameDate, filename, csvWriter, dataGenerator, data;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                dataGenerator = generateData(500000);
-                data = dataGenerator.next();
+                startDate = new Date(2024, 3, 1, 10, 30, 38);
+                endDate = new Date(2024, 3, 2, 10, 30, 38);
+                oneDay = 24 * 60 * 60 * 1000;
+                date = startDate;
                 _a.label = 1;
             case 1:
-                if (!!data.done) return [3 /*break*/, 3];
-                return [4 /*yield*/, csvWriter.writeRecords([data.value])];
+                if (!(date <= endDate)) return [3 /*break*/, 6];
+                formattedDate = formatDateToDDMMYYYYHHMMSS(date);
+                formattedFilenameDate = formatDateForFilename(date);
+                filename = "cbs_".concat(formattedFilenameDate, ".csv");
+                csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
+                    path: filename,
+                    header: [
+                        { id: 'A', title: 'A' },
+                        { id: 'DATE', title: 'DATE' },
+                        { id: 'AMOUNT', title: 'AMOUNT' },
+                        { id: 'B', title: 'B' },
+                        { id: 'C', title: 'C' },
+                        { id: 'D', title: 'D' },
+                        { id: 'E', title: 'E' },
+                        { id: 'F', title: 'F' },
+                        { id: 'G', title: 'G' },
+                        { id: 'RRN', title: 'RRN' },
+                        { id: 'H', title: 'H' },
+                        { id: 'TXNID', title: 'TXNID' }
+                    ],
+                });
+                dataGenerator = generateData(500, formattedDate);
+                data = dataGenerator.next();
+                _a.label = 2;
             case 2:
+                if (!!data.done) return [3 /*break*/, 4];
+                return [4 /*yield*/, csvWriter.writeRecords([data.value])];
+            case 3:
                 _a.sent();
                 data = dataGenerator.next();
+                return [3 /*break*/, 2];
+            case 4:
+                console.log("Data generation completed for ".concat(formattedDate, ". File: ").concat(filename));
+                _a.label = 5;
+            case 5:
+                date = new Date(date.getTime() + oneDay);
                 return [3 /*break*/, 1];
-            case 3:
-                console.log('Data generation completed.');
-                return [2 /*return*/];
+            case 6: return [2 /*return*/];
         }
     });
 }); })();
