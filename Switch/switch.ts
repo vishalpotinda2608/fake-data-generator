@@ -53,7 +53,7 @@ function formatFullDateWithTime(date: Date): string {
 // Generate and write data for each date in the specified range
 (async () => {
     const startDate = new Date(2024, 3, 1); // April 1, 2024
-    const endDate = new Date(2024, 3, 2); // April 2, 2024
+    const endDate = new Date(2024, 3, 30); // April 2, 2024
     const oneDay = 24 * 60 * 60 * 1000;
 
     for (let date = startDate; date <= endDate; date = new Date(date.getTime() + oneDay)) {
