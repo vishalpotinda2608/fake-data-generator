@@ -72,38 +72,31 @@ function generateData(count, date) {
         }
     });
 }
-// Function to format date to 'MMDDYY'
-function formatDate(date) {
-    var day = String(date.getDate()).padStart(2, '0');
-    var month = String(date.getMonth() + 1).padStart(2, '0');
-    var year = String(date.getFullYear()).slice(-2);
-    return "".concat(month).concat(day).concat(year);
-}
-// Function to format date to 'YYYY-MM-DD HH:mm' format
-function formatFullDate(date) {
+// Function to format date to 'DD-MM-YYYY HH:mm:ss' format
+function formatFullDateWithTime(date) {
     var day = String(date.getDate()).padStart(2, '0');
     var month = String(date.getMonth() + 1).padStart(2, '0');
     var year = date.getFullYear();
-    var hours = '00';
-    var minutes = '00';
-    return "".concat(year, "-").concat(month, "-").concat(day, " ").concat(hours, ":").concat(minutes);
+    var hours = String(date.getHours()).padStart(2, '0');
+    var minutes = String(date.getMinutes()).padStart(2, '0');
+    var seconds = String(date.getSeconds()).padStart(2, '0');
+    return "".concat(day, "-").concat(month, "-").concat(year, " ").concat(hours, ":").concat(minutes, ":").concat(seconds);
 }
 // Generate and write data for each date in the specified range
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var startDate, endDate, oneDay, date, formattedDate, fullFormattedDate, fileName, csvWriter, dataGenerator, data;
+    var startDate, endDate, oneDay, date, fullFormattedDateWithTime, fileName, csvWriter, dataGenerator, data;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 startDate = new Date(2024, 3, 1);
-                endDate = new Date(2024, 3, 10);
+                endDate = new Date(2024, 3, 2);
                 oneDay = 24 * 60 * 60 * 1000;
                 date = startDate;
                 _a.label = 1;
             case 1:
                 if (!(date <= endDate)) return [3 /*break*/, 6];
-                formattedDate = formatDate(date);
-                fullFormattedDate = formatFullDate(date);
-                fileName = "switch_".concat(formattedDate, ".csv");
+                fullFormattedDateWithTime = formatFullDateWithTime(date);
+                fileName = "switch_".concat(fullFormattedDateWithTime, ".csv");
                 csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
                     path: fileName,
                     header: [
@@ -121,7 +114,7 @@ function formatFullDate(date) {
                         { id: 'MCC', title: 'MCC' }
                     ]
                 });
-                dataGenerator = generateData(500, fullFormattedDate);
+                dataGenerator = generateData(50000, fullFormattedDateWithTime);
                 data = dataGenerator.next();
                 _a.label = 2;
             case 2:
@@ -132,7 +125,7 @@ function formatFullDate(date) {
                 data = dataGenerator.next();
                 return [3 /*break*/, 2];
             case 4:
-                console.log("Data generation completed for ".concat(fullFormattedDate, ". File: ").concat(fileName));
+                console.log("Data generation completed for ".concat(fullFormattedDateWithTime, ". File: ").concat(fileName));
                 _a.label = 5;
             case 5:
                 date = new Date(date.getTime() + oneDay);

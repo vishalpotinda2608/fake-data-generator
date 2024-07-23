@@ -38,34 +38,27 @@ function* generateData(count: number, date: any): IterableIterator<NPCI_TXN> {
     }
 }
 
-// Function to format date to 'MMDDYY'
-function formatDate(date: Date): string {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = String(date.getFullYear()).slice(-2);
-    return `${month}${day}${year}`;
-}
-
-// Function to format date to 'YYYY-MM-DD HH:mm' format
-function formatFullDate(date: Date): string {
+// Function to format date to 'DD-MM-YYYY HH:mm:ss' format
+function formatFullDateWithTime(date: Date): string {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    const hours = '00';
-    const minutes = '00';
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 }
 
 // Generate and write data for each date in the specified range
 (async () => {
     const startDate = new Date(2024, 3, 1); // April 1, 2024
-    const endDate = new Date(2024, 3, 30); // April 10, 2024
+    const endDate = new Date(2024, 3, 2); // April 2, 2024
     const oneDay = 24 * 60 * 60 * 1000;
 
     for (let date = startDate; date <= endDate; date = new Date(date.getTime() + oneDay)) {
-        const formattedDate = formatDate(date);
-        const fullFormattedDate = formatFullDate(date);
-        const fileName = `switch_${formattedDate}.csv`;
+        const fullFormattedDateWithTime = formatFullDateWithTime(date);
+        const fileName = `switch_${fullFormattedDateWithTime}.csv`;
 
         const csvWriter = createObjectCsvWriter({
             path: fileName,
@@ -85,12 +78,12 @@ function formatFullDate(date: Date): string {
             ]
         });
 
-        const dataGenerator = generateData(500000, fullFormattedDate);
+        const dataGenerator = generateData(50000, fullFormattedDateWithTime);
         let data = dataGenerator.next();
         while (!data.done) {
             await csvWriter.writeRecords([data.value]);
             data = dataGenerator.next();
         }
-        console.log(`Data generation completed for ${fullFormattedDate}. File: ${fileName}`);
+        console.log(`Data generation completed for ${fullFormattedDateWithTime}. File: ${fileName}`);
     }
 })();
