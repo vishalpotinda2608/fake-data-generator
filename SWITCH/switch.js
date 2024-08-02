@@ -27,10 +27,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateNpciData = generateNpciData;
+exports.generateSwitchData = generateSwitchData;
 var faker_1 = require("@faker-js/faker");
-//NPCI
-function generateNpciData(count, date, commonData) {
+// SWITCH
+function generateSwitchData(count, date, commonData) {
     var i, _a, TXNID, AMOUNT, NPCI_CODE;
     return __generator(this, function (_b) {
         switch (_b.label) {
@@ -41,32 +41,18 @@ function generateNpciData(count, date, commonData) {
                 if (!(i < count)) return [3 /*break*/, 4];
                 _a = commonData[i], TXNID = _a.TXNID, AMOUNT = _a.AMOUNT, NPCI_CODE = _a.NPCI_CODE;
                 return [4 /*yield*/, {
-                        NPCI_TXN_TYPE: 'TX',
-                        NPCI_STATUS: 'U2',
-                        TXNID: TXNID,
-                        RRN: faker_1.faker.random.numeric(12),
-                        NPCI_CODE: NPCI_CODE[0],
+                        A: 'U09',
                         DATE: date,
-                        TIME: '210230',
                         AMOUNT: AMOUNT,
-                        A: 'cb9274e72eb6406fba57211045db5fa5@axl',
-                        B: '1',
-                        C: '1',
-                        D: '0',
-                        PSP: faker_1.faker.company.name(),
-                        E: '0',
-                        PAYER_VPA: faker_1.faker.internet.email().replace('.com', ''),
-                        F: 'COB',
+                        NPCI_CODE: NPCI_CODE[1],
+                        RRN: faker_1.faker.random.numeric(12),
+                        EXNID: faker_1.faker.string.uuid(),
                         PAYEE_VPA: faker_1.faker.internet.email().replace('.com', ''),
+                        C: '1',
+                        PAYER_VPA: faker_1.faker.internet.email().replace('.com', ''),
+                        D: '0',
+                        TXNID: TXNID,
                         MCC: faker_1.faker.random.numeric(4),
-                        G: 'SBI',
-                        H: 'AIRP0000001',
-                        I: '1',
-                        J: '111',
-                        K: 'AXB',
-                        L: "UTIB0003966",
-                        M: '1',
-                        N: '1'
                     }];
             case 2:
                 _b.sent();
