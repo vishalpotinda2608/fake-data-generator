@@ -43,14 +43,15 @@ var switch_1 = require("./SWITCH/switch");
 var cbs_1 = require("./CBS/cbs");
 var constant_1 = require("./Constants/constant");
 // Generate common TXNID and AMOUNT once and reuse
+var ROW_DATA = 20;
 var generateCommonData = function (count) {
     return Array.from({ length: count }, function () { return ({
         TXNID: faker_1.faker.database.mongodbObjectId(),
         AMOUNT: faker_1.faker.finance.amount(),
-        NPCI_CODE: faker_1.faker.helpers.arrayElement([['00', 'SUCCESS',], ['RB', 'SUCCESS'], ['Z9', 'FAILURE',], ['Z7', 'FAILURE']])
+        NPCI_CODE: faker_1.faker.helpers.arrayElement([['00', 'SUCCESS',], ['RB', 'DEEMED'], ['Z9', 'FAILURE',], ['Z7', 'FAILURE']])
     }); });
 };
-var commonData = generateCommonData(10);
+var commonData = generateCommonData(ROW_DATA);
 // Function to format date to 'DD-MM-YYYY HH:mm:ss' format
 function formatDateToDDMMYYYYHHMMSS(date) {
     var day = String(date.getDate()).padStart(2, '0');
@@ -129,6 +130,6 @@ function writeDataToCSV(filename, headers, dataGenerator) {
 var currentDate = new Date();
 var formattedDate = formatDateToDDMMYYYYHHMMSS(currentDate);
 var filenameDate = formatDateForFilename(currentDate);
-writeDataToCSV("npc_txns_".concat(filenameDate, ".csv"), constant_1.npciHeaders, function () { return (0, npci_1.generateNpciData)(10, formattedDate, commonData); });
-writeDataToCSV("switch_txns_".concat(filenameDate, ".csv"), constant_1.switchHeaders, function () { return (0, switch_1.generateSwitchData)(10, formattedDate, commonData); });
-writeDataToCSV("cbs_txns_".concat(filenameDate, ".csv"), constant_1.cbsHeaders, function () { return (0, cbs_1.generateCbsData)(10, formattedDate, commonData); });
+writeDataToCSV("npc_txns_".concat(filenameDate, ".csv"), constant_1.npciHeaders, function () { return (0, npci_1.generateNpciData)(ROW_DATA, formattedDate, commonData); });
+writeDataToCSV("switch_txns_".concat(filenameDate, ".csv"), constant_1.switchHeaders, function () { return (0, switch_1.generateSwitchData)(ROW_DATA, formattedDate, commonData); });
+writeDataToCSV("cbs_txns_".concat(filenameDate, ".csv"), constant_1.cbsHeaders, function () { return (0, cbs_1.generateCbsData)(ROW_DATA, formattedDate, commonData); });

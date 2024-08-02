@@ -5,16 +5,20 @@ import {generateNpciData} from './NPCI/npci'
 import {generateSwitchData} from './SWITCH/switch'
 import {generateCbsData} from './CBS/cbs'
 import { cbsHeaders, npciHeaders, switchHeaders } from './Constants/constant';
+import { start } from 'repl';
 
 // Generate common TXNID and AMOUNT once and reuse
+
+const  ROW_DATA=20;
+
 const generateCommonData = (count: number): { TXNID: string, AMOUNT: string,NPCI_CODE }[] => {
     return Array.from({ length: count }, () => ({
         TXNID: faker.database.mongodbObjectId(),
         AMOUNT: faker.finance.amount(),
-        NPCI_CODE:faker.helpers.arrayElement([['00', 'SUCCESS',],['RB', 'SUCCESS'],['Z9', 'FAILURE',],['Z7', 'FAILURE']])
+        NPCI_CODE:faker.helpers.arrayElement([['00', 'SUCCESS',],['RB', 'DEEMED'],['Z9', 'FAILURE',],['Z7', 'FAILURE']])
     }));
 };
-const commonData = generateCommonData(10);
+const commonData = generateCommonData(ROW_DATA);
 
 // Function to format date to 'DD-MM-YYYY HH:mm:ss' format
 function formatDateToDDMMYYYYHHMMSS(date: Date): string {
@@ -74,6 +78,6 @@ const currentDate = new Date();
 const formattedDate = formatDateToDDMMYYYYHHMMSS(currentDate);
 const filenameDate = formatDateForFilename(currentDate);
 
-writeDataToCSV(`npc_txns_${filenameDate}.csv`, npciHeaders, () => generateNpciData(10, formattedDate,commonData));
-writeDataToCSV(`switch_txns_${filenameDate}.csv`, switchHeaders, () => generateSwitchData(10, formattedDate,commonData));
-writeDataToCSV(`cbs_txns_${filenameDate}.csv`, cbsHeaders, () => generateCbsData(10, formattedDate,commonData));
+writeDataToCSV(`npc_txns_${filenameDate}.csv`, npciHeaders, () => generateNpciData(ROW_DATA, formattedDate,commonData));
+writeDataToCSV(`switch_txns_${filenameDate}.csv`, switchHeaders, () => generateSwitchData(ROW_DATA, formattedDate,commonData));
+writeDataToCSV(`cbs_txns_${filenameDate}.csv`, cbsHeaders, () => generateCbsData(ROW_DATA, formattedDate,commonData));
