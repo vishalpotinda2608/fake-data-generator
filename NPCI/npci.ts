@@ -1,10 +1,11 @@
 import { faker } from '@faker-js/faker';
 import { NPCI_TXN } from '../Models/NPCI_TXN.model';
+import { beneficiaryTypes, generateRandomTime, MCC_CODE, merchantVPAs } from '../Constants/constant';
 //NPCI
 
 export function* generateNpciData(count: number, date: string,commonData): IterableIterator<NPCI_TXN> {
     for (let i = 0; i < count; i++) {
-        const { TXNID, AMOUNT,NPCI_CODE } = commonData[i];
+        const { TXNID, AMOUNT,NPCI_CODE ,PAYEE_VPA,PAYER_VPA} = commonData[i];
         yield {
             NPCI_TXN_TYPE: 'TX',
             NPCI_STATUS: 'U2',
@@ -12,26 +13,26 @@ export function* generateNpciData(count: number, date: string,commonData): Itera
             RRN: faker.random.numeric(12),
             NPCI_CODE: NPCI_CODE[0],
             DATE: date,
-            TIME: '210230',
-            AMOUNT: AMOUNT,
-            A: 'cb9274e72eb6406fba57211045db5fa5@axl',
+            TIME: generateRandomTime(),
+            AMOUNT: (AMOUNT*100).toFixed(0),
+            A: '',
             B: '1',
             C: '1',
             D: '0',
-            PSP: faker.company.name(),
+            PSP: faker.helpers.arrayElement(beneficiaryTypes),
             E: '0',
-            PAYER_VPA: faker.internet.email().replace('.com', ''),
-            F: 'COB',
-            PAYEE_VPA: faker.internet.email().replace('.com', ''),
-            MCC: faker.random.numeric(4),
-            G: 'SBI',
-            H: 'AIRP0000001',
+            PAYER_VPA:PAYER_VPA ,
+            F: faker.helpers.arrayElement(beneficiaryTypes),
+            MCC: MCC_CODE[PAYEE_VPA.split('.')[0]],
+            PAYEE_VPA: PAYEE_VPA,
+            G: 'SMB',
+            H: `SBM${faker.random.numeric(7)}`,
             I: '1',
-            J: '111',
-            K: 'AXB',
-            L: "UTIB0003966",
-            M: '1',
-            N: '1'
+            J: `${faker.random.numeric(11)}`,
+            K: faker.helpers.arrayElement(beneficiaryTypes),
+            L: `${faker.helpers.arrayElement(beneficiaryTypes)}${faker.random.numeric(7)}`,
+            M: '2',
+            N: `${faker.random.numeric(11)}`
         };
     }
 }

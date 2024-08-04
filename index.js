@@ -36,50 +36,34 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var fs = require("fs");
+var path = require("path");
 var csv_writer_1 = require("csv-writer");
 var faker_1 = require("@faker-js/faker");
 var npci_1 = require("./NPCI/npci");
 var switch_1 = require("./SWITCH/switch");
 var cbs_1 = require("./CBS/cbs");
 var constant_1 = require("./Constants/constant");
-// Generate common TXNID and AMOUNT once and reuse
-var ROW_DATA = 20;
-var generateCommonData = function (count) {
-    return Array.from({ length: count }, function () { return ({
-        TXNID: faker_1.faker.database.mongodbObjectId(),
-        AMOUNT: faker_1.faker.finance.amount(),
-        NPCI_CODE: faker_1.faker.helpers.arrayElement([['00', 'SUCCESS',], ['RB', 'DEEMED'], ['Z9', 'FAILURE',], ['Z7', 'FAILURE']])
-    }); });
+var adjustment_1 = require("./ADJUSTMENT/adjustment");
+var ROW_DATA = 10;
+var ensureDirectoryExists = function (filePath) {
+    var directory = path.dirname(filePath);
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+    }
 };
-var commonData = generateCommonData(ROW_DATA);
-// Function to format date to 'DD-MM-YYYY HH:mm:ss' format
-function formatDateToDDMMYYYYHHMMSS(date) {
-    var day = String(date.getDate()).padStart(2, '0');
-    var month = String(date.getMonth() + 1).padStart(2, '0');
-    var year = date.getFullYear();
-    var hours = String(date.getHours()).padStart(2, '0');
-    var minutes = String(date.getMinutes()).padStart(2, '0');
-    var seconds = String(date.getSeconds()).padStart(2, '0');
-    return "".concat(day, "-").concat(month, "-").concat(year, " ").concat(hours, ":").concat(minutes, ":").concat(seconds);
-}
-// Function to format date to 'YYYYMMDD' for filename
-function formatDateForFilename(date) {
-    var day = String(date.getDate()).padStart(2, '0');
-    var month = String(date.getMonth() + 1).padStart(2, '0');
-    var year = date.getFullYear();
-    return "".concat(year).concat(month).concat(day);
-}
 function writeDataToCSV(filename, headers, dataGenerator) {
     return __awaiter(this, void 0, void 0, function () {
         var csvWriter, batchSize, batch, dataArray, _i, dataArray_1, record, error_1, error_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    ensureDirectoryExists(filename);
                     csvWriter = (0, csv_writer_1.createObjectCsvWriter)({
                         path: filename,
                         header: headers,
                     });
-                    batchSize = 1000;
+                    batchSize = 10000;
                     batch = [];
                     dataArray = Array.from(dataGenerator());
                     _i = 0, dataArray_1 = dataArray;
@@ -126,10 +110,53 @@ function writeDataToCSV(filename, headers, dataGenerator) {
         });
     });
 }
-// Generate date for files
-var currentDate = new Date();
-var formattedDate = formatDateToDDMMYYYYHHMMSS(currentDate);
-var filenameDate = formatDateForFilename(currentDate);
-writeDataToCSV("npc_txns_".concat(filenameDate, ".csv"), constant_1.npciHeaders, function () { return (0, npci_1.generateNpciData)(ROW_DATA, formattedDate, commonData); });
-writeDataToCSV("switch_txns_".concat(filenameDate, ".csv"), constant_1.switchHeaders, function () { return (0, switch_1.generateSwitchData)(ROW_DATA, formattedDate, commonData); });
-writeDataToCSV("cbs_txns_".concat(filenameDate, ".csv"), constant_1.cbsHeaders, function () { return (0, cbs_1.generateCbsData)(ROW_DATA, formattedDate, commonData); });
+// Generate common TXNID and AMOUNT once and reuse
+var generateCommonData = function (date, count) {
+    return Array.from({ length: count }, function () { return ({
+        TXNID: faker_1.faker.database.mongodbObjectId(),
+        AMOUNT: faker_1.faker.finance.amount(),
+        NPCI_CODE: faker_1.faker.helpers.arrayElement([['00', 'SUCCESS'], ['0', 'SUCCESS'], ['RB', 'DEEMED'], ['Z9', 'FAILURE'], ['Z7', 'FAILURE']]),
+        PAYEE_VPA: faker_1.faker.helpers.arrayElement(constant_1.merchantVPAs),
+        PAYER_VPA: "".concat(faker_1.faker.internet.email().split('@')[0]).concat(faker_1.faker.helpers.arrayElement(constant_1.payerVpas))
+    }); });
+};
+var generateDataForDateRange = function (startDate, numberOfDays) {
+    var endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + numberOfDays - 1);
+    var _loop_1 = function (date) {
+        var currentDate = new Date(date); // Clone the current date
+        // Format dates for each file
+        var formattedDate = (0, constant_1.formatDateToDDMMYYYYHHMMSS)(currentDate);
+        var npciFormattedDate = (0, constant_1.formatDate)(currentDate);
+        var switchFormattedDate = (0, constant_1.formatFullDateWithTimeSWITCH)(currentDate);
+        var filenameDate = (0, constant_1.formatDateForFilename)(currentDate);
+        // Generate data for the current date
+        var commonData = generateCommonData(currentDate, ROW_DATA);
+        // Write data to CSV files
+        writeDataToCSV("NPCI_DATA/".concat(filenameDate, "/UPIMERCHANTRAWDATAACQSBM").concat(filenameDate, ".csv"), constant_1.npciHeaders, function () { return (0, npci_1.generateNpciData)(ROW_DATA, npciFormattedDate, commonData); });
+        writeDataToCSV("SWITCH_DATA/".concat(filenameDate, "/switch_txns_").concat(filenameDate, ".csv"), constant_1.switchHeaders, function () { return (0, switch_1.generateSwitchData)(ROW_DATA, switchFormattedDate, commonData); });
+        writeDataToCSV("CBS_DATA/".concat(filenameDate, "/cbs_txns_").concat(filenameDate, ".csv"), constant_1.cbsHeaders, function () { return (0, cbs_1.generateCbsData)(ROW_DATA, formattedDate, commonData); });
+        writeDataToCSV("ADJUMENT/".concat(filenameDate, "/ADJUSTMENT").concat(filenameDate, ".csv"), constant_1.adjustHeaders, function () { return (0, adjustment_1.generateAdjustmentData)(ROW_DATA, formattedDate, commonData); });
+    };
+    for (var date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+        _loop_1(date);
+    }
+};
+// Usage example
+var startDate = new Date(2024, 7, 1); // August 1, 2024
+var numberOfDays = 30; // Number of days to generate data for
+generateDataForDateRange(startDate, numberOfDays);
+// const commonData = generateCommonData(ROW_DATA);
+// // Generate date for files
+// const currentDate = new Date();
+// const formattedDate = formatDateToDDMMYYYYHHMMSS(currentDate);
+// //NPCI
+// const npciFormatedDate=formatDate(currentDate)
+// //SWITCH
+// const switchFormatedDate=formatFullDateWithTimeSWITCH(currentDate)
+// //File
+// const filenameDate = formatDateForFilename(currentDate);
+// writeDataToCSV(`UPIMERCHANTRAWDATAACQSBM${filenameDate}.csv`, npciHeaders, () => generateNpciData(ROW_DATA, npciFormatedDate,commonData));
+// writeDataToCSV(`switch_txns_${filenameDate}.csv`, switchHeaders, () => generateSwitchData(ROW_DATA, switchFormatedDate,commonData));
+// writeDataToCSV(`cbs_txns_${filenameDate}.csv`, cbsHeaders, () => generateCbsData(ROW_DATA, formattedDate,commonData));
+// writeDataToCSV(`ADJUSTMENT${filenameDate}.csv`, adjustHeaders, () => generateAdjustmentData(ROW_DATA, formattedDate,commonData));

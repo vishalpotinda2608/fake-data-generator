@@ -6,7 +6,7 @@
     NPCI_CODE: any | null;
     DATE: string;
     TIME: string | null;
-    AMOUNT: string | null;
+    AMOUNT: string | number;
     A: any;
     B: any;
     C: any;

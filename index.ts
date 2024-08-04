@@ -1,54 +1,33 @@
 import * as fs from 'fs';
+import  * as path from 'path';
 import { createObjectCsvWriter } from 'csv-writer';
 import { faker } from '@faker-js/faker';
-import {generateNpciData} from './NPCI/npci'
-import {generateSwitchData} from './SWITCH/switch'
-import {generateCbsData} from './CBS/cbs'
-import { cbsHeaders, npciHeaders, switchHeaders } from './Constants/constant';
-import { start } from 'repl';
+import { generateNpciData } from './NPCI/npci'
+import { generateSwitchData } from './SWITCH/switch'
+import { generateCbsData } from './CBS/cbs'
+import { adjustHeaders, cbsHeaders, formatDate, formatDateForFilename, formatDateToDDMMYYYYHHMMSS, formatFullDateWithTimeSWITCH, merchantVPAs, npciHeaders, payerVpas, switchHeaders } from './Constants/constant';
+import { generateAdjustmentData } from './ADJUSTMENT/adjustment';
 
-// Generate common TXNID and AMOUNT once and reuse
+const ROW_DATA = 10;
 
-const  ROW_DATA=20;
-
-const generateCommonData = (count: number): { TXNID: string, AMOUNT: string,NPCI_CODE }[] => {
-    return Array.from({ length: count }, () => ({
-        TXNID: faker.database.mongodbObjectId(),
-        AMOUNT: faker.finance.amount(),
-        NPCI_CODE:faker.helpers.arrayElement([['00', 'SUCCESS',],['RB', 'DEEMED'],['Z9', 'FAILURE',],['Z7', 'FAILURE']])
-    }));
+const ensureDirectoryExists = (filePath: string) => {
+    const directory = path.dirname(filePath);
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+    }
 };
-const commonData = generateCommonData(ROW_DATA);
 
-// Function to format date to 'DD-MM-YYYY HH:mm:ss' format
-function formatDateToDDMMYYYYHHMMSS(date: Date): string {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-}
-
-// Function to format date to 'YYYYMMDD' for filename
-function formatDateForFilename(date: Date): string {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${year}${month}${day}`;
-}
 
 async function writeDataToCSV(filename: string, headers: any[], dataGenerator: () => IterableIterator<any>) {
+    ensureDirectoryExists(filename);
+
     const csvWriter = createObjectCsvWriter({
         path: filename,
         header: headers,
     });
-
-    const batchSize = 1000; // Adjust batch size as needed
+    const batchSize = 10000;
     let batch: any[] = [];
     const dataArray = Array.from(dataGenerator());
-
     for (let record of dataArray) {
         batch.push(record);
         if (batch.length >= batchSize) {
@@ -62,7 +41,6 @@ async function writeDataToCSV(filename: string, headers: any[], dataGenerator: (
         }
     }
 
-    // Write any remaining records in the batch
     if (batch.length > 0) {
         try {
             await csvWriter.writeRecords(batch);
@@ -73,11 +51,80 @@ async function writeDataToCSV(filename: string, headers: any[], dataGenerator: (
     }
 }
 
-// Generate date for files
-const currentDate = new Date();
-const formattedDate = formatDateToDDMMYYYYHHMMSS(currentDate);
-const filenameDate = formatDateForFilename(currentDate);
 
-writeDataToCSV(`npc_txns_${filenameDate}.csv`, npciHeaders, () => generateNpciData(ROW_DATA, formattedDate,commonData));
-writeDataToCSV(`switch_txns_${filenameDate}.csv`, switchHeaders, () => generateSwitchData(ROW_DATA, formattedDate,commonData));
-writeDataToCSV(`cbs_txns_${filenameDate}.csv`, cbsHeaders, () => generateCbsData(ROW_DATA, formattedDate,commonData));
+
+// Generate common TXNID and AMOUNT once and reuse
+const generateCommonData = (date, count) => {
+    return Array.from({ length: count }, () => ({
+        TXNID: faker.database.mongodbObjectId(),
+        AMOUNT: faker.finance.amount(),
+        NPCI_CODE: faker.helpers.arrayElement([['00', 'SUCCESS'], ['0', 'SUCCESS'], ['RB', 'DEEMED'], ['Z9', 'FAILURE'], ['Z7', 'FAILURE']]),
+        PAYEE_VPA: faker.helpers.arrayElement(merchantVPAs),
+        PAYER_VPA: `${faker.internet.email().split('@')[0]}${faker.helpers.arrayElement(payerVpas)}`
+    }));
+};
+
+
+const generateDataForDateRange = (startDate, numberOfDays) => {
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + numberOfDays - 1);
+
+    for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+        const currentDate = new Date(date); // Clone the current date
+
+        // Format dates for each file
+        const formattedDate = formatDateToDDMMYYYYHHMMSS(currentDate);
+        const npciFormattedDate = formatDate(currentDate);
+        const switchFormattedDate = formatFullDateWithTimeSWITCH(currentDate);
+        const filenameDate = formatDateForFilename(currentDate);
+
+        // Generate data for the current date
+        const commonData = generateCommonData(currentDate, ROW_DATA);
+
+        // Write data to CSV files
+        writeDataToCSV(`NPCI_DATA/${filenameDate}/UPIMERCHANTRAWDATAACQSBM${filenameDate}.csv`, npciHeaders, () => generateNpciData(ROW_DATA, npciFormattedDate, commonData));
+        writeDataToCSV(`SWITCH_DATA/${filenameDate}/switch_txns_${filenameDate}.csv`, switchHeaders, () => generateSwitchData(ROW_DATA, switchFormattedDate, commonData));
+        writeDataToCSV(`CBS_DATA/${filenameDate}/cbs_txns_${filenameDate}.csv`, cbsHeaders, () => generateCbsData(ROW_DATA, formattedDate, commonData));
+        writeDataToCSV(`ADJUMENT/${filenameDate}/ADJUSTMENT${filenameDate}.csv`, adjustHeaders, () => generateAdjustmentData(ROW_DATA, formattedDate, commonData));
+    }
+};
+
+// Usage example
+const startDate = new Date(2024, 7, 1); // August 1, 2024
+const numberOfDays = 30; // Number of days to generate data for
+generateDataForDateRange(startDate, numberOfDays);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const commonData = generateCommonData(ROW_DATA);
+
+
+// // Generate date for files
+// const currentDate = new Date();
+// const formattedDate = formatDateToDDMMYYYYHHMMSS(currentDate);
+// //NPCI
+// const npciFormatedDate=formatDate(currentDate)
+
+// //SWITCH
+// const switchFormatedDate=formatFullDateWithTimeSWITCH(currentDate)
+
+// //File
+// const filenameDate = formatDateForFilename(currentDate);
+
+// writeDataToCSV(`UPIMERCHANTRAWDATAACQSBM${filenameDate}.csv`, npciHeaders, () => generateNpciData(ROW_DATA, npciFormatedDate,commonData));
+// writeDataToCSV(`switch_txns_${filenameDate}.csv`, switchHeaders, () => generateSwitchData(ROW_DATA, switchFormatedDate,commonData));
+// writeDataToCSV(`cbs_txns_${filenameDate}.csv`, cbsHeaders, () => generateCbsData(ROW_DATA, formattedDate,commonData));
+// writeDataToCSV(`ADJUSTMENT${filenameDate}.csv`, adjustHeaders, () => generateAdjustmentData(ROW_DATA, formattedDate,commonData));

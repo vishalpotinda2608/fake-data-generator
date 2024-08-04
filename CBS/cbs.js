@@ -27,7 +27,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateCbsData = generateCbsData;
+exports.generateCbsData = void 0;
 var faker_1 = require("@faker-js/faker");
 // CBS
 function generateCbsData(count, date, commonData) {
@@ -64,3 +64,4 @@ function generateCbsData(count, date, commonData) {
         }
     });
 }
+exports.generateCbsData = generateCbsData;

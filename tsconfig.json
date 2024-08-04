@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+        "module": "commonjs", // or "esnext", "es6", etc.
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true
+    }
+}

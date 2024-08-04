@@ -27,11 +27,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateNpciData = generateNpciData;
+exports.generateNpciData = void 0;
 var faker_1 = require("@faker-js/faker");
+var constant_1 = require("../Constants/constant");
 //NPCI
 function generateNpciData(count, date, commonData) {
-    var i, _a, TXNID, AMOUNT, NPCI_CODE;
+    var i, _a, TXNID, AMOUNT, NPCI_CODE, PAYEE_VPA, PAYER_VPA;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -39,7 +40,7 @@ function generateNpciData(count, date, commonData) {
                 _b.label = 1;
             case 1:
                 if (!(i < count)) return [3 /*break*/, 4];
-                _a = commonData[i], TXNID = _a.TXNID, AMOUNT = _a.AMOUNT, NPCI_CODE = _a.NPCI_CODE;
+                _a = commonData[i], TXNID = _a.TXNID, AMOUNT = _a.AMOUNT, NPCI_CODE = _a.NPCI_CODE, PAYEE_VPA = _a.PAYEE_VPA, PAYER_VPA = _a.PAYER_VPA;
                 return [4 /*yield*/, {
                         NPCI_TXN_TYPE: 'TX',
                         NPCI_STATUS: 'U2',
@@ -47,26 +48,26 @@ function generateNpciData(count, date, commonData) {
                         RRN: faker_1.faker.random.numeric(12),
                         NPCI_CODE: NPCI_CODE[0],
                         DATE: date,
-                        TIME: '210230',
-                        AMOUNT: AMOUNT,
-                        A: 'cb9274e72eb6406fba57211045db5fa5@axl',
+                        TIME: (0, constant_1.generateRandomTime)(),
+                        AMOUNT: (AMOUNT * 100).toFixed(0),
+                        A: '',
                         B: '1',
                         C: '1',
                         D: '0',
-                        PSP: faker_1.faker.company.name(),
+                        PSP: faker_1.faker.helpers.arrayElement(constant_1.beneficiaryTypes),
                         E: '0',
-                        PAYER_VPA: faker_1.faker.internet.email().replace('.com', ''),
-                        F: 'COB',
-                        PAYEE_VPA: faker_1.faker.internet.email().replace('.com', ''),
-                        MCC: faker_1.faker.random.numeric(4),
-                        G: 'SBI',
-                        H: 'AIRP0000001',
+                        PAYER_VPA: PAYER_VPA,
+                        F: faker_1.faker.helpers.arrayElement(constant_1.beneficiaryTypes),
+                        MCC: constant_1.MCC_CODE[PAYEE_VPA.split('.')[0]],
+                        PAYEE_VPA: PAYEE_VPA,
+                        G: 'SMB',
+                        H: "SBM".concat(faker_1.faker.random.numeric(7)),
                         I: '1',
-                        J: '111',
-                        K: 'AXB',
-                        L: "UTIB0003966",
-                        M: '1',
-                        N: '1'
+                        J: "".concat(faker_1.faker.random.numeric(11)),
+                        K: faker_1.faker.helpers.arrayElement(constant_1.beneficiaryTypes),
+                        L: "".concat(faker_1.faker.helpers.arrayElement(constant_1.beneficiaryTypes)).concat(faker_1.faker.random.numeric(7)),
+                        M: '2',
+                        N: "".concat(faker_1.faker.random.numeric(11))
                     }];
             case 2:
                 _b.sent();
@@ -78,3 +79,4 @@ function generateNpciData(count, date, commonData) {
         }
     });
 }
+exports.generateNpciData = generateNpciData;
