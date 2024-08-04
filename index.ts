@@ -65,7 +65,7 @@ const generateCommonData = (date, count) => {
 };
 
 
-const generateDataForDateRange = (startDate, numberOfDays) => {
+const generateDataForDateRange = (startDate, numberOfDays,monthName) => {
     const endDate = new Date(startDate);
     endDate.setDate(startDate.getDate() + numberOfDays - 1);
 
@@ -82,17 +82,18 @@ const generateDataForDateRange = (startDate, numberOfDays) => {
         const commonData = generateCommonData(currentDate, ROW_DATA);
 
         // Write data to CSV files
-        writeDataToCSV(`NPCI_DATA/${filenameDate}/UPIMERCHANTRAWDATAACQSBM${filenameDate}.csv`, npciHeaders, () => generateNpciData(ROW_DATA, npciFormattedDate, commonData));
-        writeDataToCSV(`SWITCH_DATA/${filenameDate}/switch_txns_${filenameDate}.csv`, switchHeaders, () => generateSwitchData(ROW_DATA, switchFormattedDate, commonData));
-        writeDataToCSV(`CBS_DATA/${filenameDate}/cbs_txns_${filenameDate}.csv`, cbsHeaders, () => generateCbsData(ROW_DATA, formattedDate, commonData));
-        writeDataToCSV(`ADJUMENT/${filenameDate}/ADJUSTMENT${filenameDate}.csv`, adjustHeaders, () => generateAdjustmentData(ROW_DATA, formattedDate, commonData));
+        writeDataToCSV(`${monthName}/NPCI_DATA/${filenameDate}/UPIMERCHANTRAWDATAACQSBM${filenameDate}.csv`, npciHeaders, () => generateNpciData(ROW_DATA, npciFormattedDate, commonData));
+        writeDataToCSV(`${monthName}/SWITCH_DATA/${filenameDate}/switch_txns_${filenameDate}.csv`, switchHeaders, () => generateSwitchData(ROW_DATA, switchFormattedDate, commonData));
+        writeDataToCSV(`${monthName}/CBS_DATA/${filenameDate}/cbs_txns_${filenameDate}.csv`, cbsHeaders, () => generateCbsData(ROW_DATA, formattedDate, commonData));
+        writeDataToCSV(`${monthName}/ADJUMENT/${filenameDate}/ADJUSTMENT${filenameDate}.csv`, adjustHeaders, () => generateAdjustmentData(ROW_DATA, formattedDate, commonData));
     }
 };
 
 // Usage example
-const startDate = new Date(2024, 7, 1); // August 1, 2024
+const startDate = new Date(2024, 8, 1); // August 1, 2024
 const numberOfDays = 30; // Number of days to generate data for
-generateDataForDateRange(startDate, numberOfDays);
+const monthName='Sep'
+generateDataForDateRange(startDate, numberOfDays,monthName);
 
 
 
