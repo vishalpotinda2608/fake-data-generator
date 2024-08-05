@@ -45,7 +45,7 @@ var switch_1 = require("./SWITCH/switch");
 var cbs_1 = require("./CBS/cbs");
 var constant_1 = require("./Constants/constant");
 var adjustment_1 = require("./ADJUSTMENT/adjustment");
-var ROW_DATA = 10;
+var ROW_DATA = 50000;
 var ensureDirectoryExists = function (filePath) {
     var directory = path.dirname(filePath);
     if (!fs.existsSync(directory)) {
@@ -143,9 +143,9 @@ var generateDataForDateRange = function (startDate, numberOfDays, monthName) {
     }
 };
 // Usage example
-var startDate = new Date(2024, 7, 1); // August 1, 2024
-var numberOfDays = 30; // Number of days to generate data for
-var monthName = 'August';
+var startDate = new Date(2024, 4, 1); // August 1, 2024
+var numberOfDays = 10; // Number of days to generate data for
+var monthName = 'MAY';
 generateDataForDateRange(startDate, numberOfDays, monthName);
 // const commonData = generateCommonData(ROW_DATA);
 // // Generate date for files

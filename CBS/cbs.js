@@ -27,7 +27,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateCbsData = void 0;
+exports.generateCbsData = generateCbsData;
 var faker_1 = require("@faker-js/faker");
 // CBS
 function generateCbsData(count, date, commonData) {
@@ -44,14 +44,14 @@ function generateCbsData(count, date, commonData) {
                         A: 'S75960940',
                         DATE: date,
                         AMOUNT: AMOUNT,
-                        B: '04-04-2024',
+                        B: date,
                         C: '',
                         D: '2001',
                         E: '2650',
                         F: '20012207843065',
                         G: '27111001182650',
                         RRN: faker_1.faker.random.numeric(12),
-                        H: '04-04-2024 01:38:36',
+                        H: date,
                         TXNID: TXNID,
                     }];
             case 2:
@@ -64,4 +64,3 @@ function generateCbsData(count, date, commonData) {
         }
     });
 }
-exports.generateCbsData = generateCbsData;
