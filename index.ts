@@ -8,7 +8,7 @@ import { generateCbsData } from './CBS/cbs'
 import { adjustHeaders, cbsHeaders, formatDate, formatDateForFilename, formatDateToDDMMYYYYHHMMSS, formatFullDateWithTimeSWITCH, merchantVPAs, npciHeaders, payerVpas, switchHeaders } from './Constants/constant';
 import { generateAdjustmentData } from './ADJUSTMENT/adjustment';
 
-const ROW_DATA=50000;
+const ROW_DATA=10000;
 
 const ensureDirectoryExists = (filePath: string) => {
     const directory = path.dirname(filePath);
@@ -90,9 +90,9 @@ const generateDataForDateRange = (startDate, numberOfDays,monthName) => {
 };
 
 // Usage example
-const startDate = new Date(2024, 4, 1); // August 1, 2024
-const numberOfDays = 10; // Number of days to generate data for
-const monthName='MAY'
+const startDate = new Date(2024, 6, 1); // August 1, 2024
+const numberOfDays = 30; // Number of days to generate data for
+const monthName='JULY'
 generateDataForDateRange(startDate, numberOfDays,monthName);
 
 
